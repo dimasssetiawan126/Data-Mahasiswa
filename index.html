@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aplikasi Data Mahasiswa By Dimas Setiawan</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-card {
+            background: #0d6efd;
+            color: white;
+            padding: 20px;
+        }
+        
+        .table thead {
+            background: #0d6efd;
+            color: white;
+        }
+        
+        .badge-total {
+            font-size: 16px;
+            padding: 10px 15px;
+        }
+        
+        .btn-delete {
+            border-radius: 10px;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+        }
+        
+        .btn-primary {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="card card-custom">
+
+            <div class="header-card">
+                <h2 class="mb-0">
+                    <i class="bi bi-mortarboard-fill"></i> Aplikasi Data Mahasiswa By Dimas Setiawan
+                </h2>
+            </div>
+
+            <div class="card-body p-4">
+
+                <!-- Error -->
+                <div id="errorBox"></div>
+
+                <!-- Form -->
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nama Mahasiswa</label>
+                        <input type="text" id="nama" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">NIM</label>
+                        <input type="text" id="nim" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Program Studi</label>
+                        <input type="text" id="prodi" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="email" class="form-control">
+                    </div>
+
+                </div>
+
+                <button class="btn btn-primary" id="btnTambah">
+                <i class="bi bi-plus-circle"></i>
+                Tambah Data
+            </button>
+
+                <hr>
+
+                <!-- Total -->
+                <div class="mb-3">
+                    <span class="badge bg-success badge-total">
+                    Total Mahasiswa :
+                    <span id="totalMahasiswa">0</span>
+                    </span>
+                </div>
+
+                <!-- Tabel -->
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>NIM</th>
+                                <th>Program Studi</th>
+                                <th>Email</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let mahasiswa = [];
+
+        // Event Handling
+        document
+            .getElementById("btnTambah")
+            .addEventListener("click", tambahData);
+
+        function tambahData() {
+
+            let nama = document.getElementById("nama").value.trim();
+            let nim = document.getElementById("nim").value.trim();
+            let prodi = document.getElementById("prodi").value.trim();
+            let email = document.getElementById("email").value.trim();
+
+            let error = [];
+
+            // VALIDASI
+
+            if (nama === "") {
+                error.push("Nama tidak boleh kosong");
+            }
+
+            if (nim === "") {
+                error.push("NIM tidak boleh kosong");
+            } else if (nim.length < 5) {
+                error.push("NIM minimal 5 digit");
+            }
+
+            if (prodi === "") {
+                error.push("Program Studi tidak boleh kosong");
+            }
+
+            const regexEmail =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!regexEmail.test(email)) {
+                error.push("Format email tidak valid");
+            }
+
+            let errorBox =
+                document.getElementById("errorBox");
+
+            if (error.length > 0) {
+
+                errorBox.innerHTML =
+                    `
+        <div class="alert alert-danger">
+            ${error.join("<br>")}
+        </div>
+        `;
+
+                return;
+            }
+
+            errorBox.innerHTML = "";
+
+            // JSON ARRAY
+
+            mahasiswa.push({
+                nama: nama,
+                nim: nim,
+                prodi: prodi,
+                email: email
+            });
+
+            tampilkanData();
+
+            // reset form
+
+            document.getElementById("nama").value = "";
+            document.getElementById("nim").value = "";
+            document.getElementById("prodi").value = "";
+            document.getElementById("email").value = "";
+        }
+
+        function tampilkanData() {
+
+            let tableBody =
+                document.getElementById("tableBody");
+
+            tableBody.innerHTML = "";
+
+            mahasiswa.forEach((item, index) => {
+
+                tableBody.innerHTML +=
+                    `
+        <tr>
+            <td>${index+1}</td>
+            <td>${item.nama}</td>
+            <td>${item.nim}</td>
+            <td>${item.prodi}</td>
+            <td>${item.email}</td>
+            <td>
+                <button
+                class="btn btn-danger btn-sm btn-delete"
+                onclick="hapusData(${index})">
+                    <i class="bi bi-trash"></i>
+                    Hapus
+                </button>
+            </td>
+        </tr>
+        `;
+            });
+
+            document.getElementById("totalMahasiswa")
+                .innerText = mahasiswa.length;
+        }
+
+        function hapusData(index) {
+
+            if (confirm("Yakin ingin menghapus data ini?")) {
+
+                mahasiswa.splice(index, 1);
+
+                tampilkanData();
+            }
+        }
+    </script>
+
+</body>
+
+</html>
